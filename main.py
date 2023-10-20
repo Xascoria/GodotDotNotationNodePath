@@ -11,7 +11,7 @@ PUT_PATH_CLASSES_IN_ORIGINAL_DIR = False
 # Since it's in the same folder
 # if a scene with the same name already exist else where it should throw an err
 THROW_ERR_IF_SAME_SCENE_NAME = True
-PATH_CLASSES_FOLDER_PATH = "NodePaths"
+PATH_CLASSES_FOLDER_PATH = "NodePathsModule/NodePaths"
 
 # All of the paths are based on the root node, therefore the root node has no path
 # If toggle, throw an error instead of returning empty string on root node
@@ -119,15 +119,15 @@ def recursive_write_node_to_file(file_ptr, parent_class_name, node_dict, path_so
 
     cur_class_name = parent_class_name + '_' + node_dict['name']
 
-    file_ptr.write('public class ' + cur_class_name + ' : IAutomatedNodePath\n{\n')
+    file_ptr.write(tab + 'public class ' + cur_class_name + ' : IAutomatedNodePath\n    {\n')
     for child in node_dict['children']:
         child_class_name = cur_class_name + '_' + child
-        file_ptr.write(tab + 'public ' + child_class_name + ' ' + child + ' = new ' + child_class_name + '();\n')
+        file_ptr.write(tab*2 + 'public ' + child_class_name + ' ' + child + ' = new ' + child_class_name + '();\n')
 
-    file_ptr.write(tab + 'public string GetPath() {return "'+ 
+    file_ptr.write(tab*2 + 'public string GetPath() {return "'+ 
                    (node_dict['name'] if len(path_so_far) == 0 else '/'.join(path_so_far) + '/' + node_dict['name'])  + '";}\n')
-    file_ptr.write(tab + 'public Node GetNode(Node rootNode) { return rootNode.GetNode<'+ node_dict['type'] +'>(GetPath()); }\n')
-    file_ptr.write('}\n\n')
+    file_ptr.write(tab*2 + 'public Node GetNode(Node rootNode) { return rootNode.GetNode<'+ node_dict['type'] +'>(GetPath()); }\n')
+    file_ptr.write(tab + '}\n\n')
 
     for child in node_dict['children']:
         recursive_write_node_to_file(file_ptr, cur_class_name, node_dict['children'][child], [node_dict['name']])
@@ -143,24 +143,26 @@ def write_node_to_file(file_ptr, new_class_name, nodes_dict):
     root_node_name = root_node['name']
     root_node_class_name = new_class_name + '_' + root_node_name
     file_ptr.write('public class '+new_class_name+'\n{\n' + tab + "public " 
-                   + root_node_class_name + " " + root_node_name + " = new " + root_node_class_name + "();\n}\n\n" )
+                   + root_node_class_name + " " + root_node_name + " = new " + root_node_class_name + "();\n" )
 
     # Write root node
-    file_ptr.write('public class ' + root_node_class_name + ' : IAutomatedNodePath\n{\n')
+    file_ptr.write(tab + 'public class ' + root_node_class_name + ' : IAutomatedNodePath\n' + tab + '{\n')
     for child in root_node['children']:
         child_class_name = root_node_class_name + '_' + child
-        file_ptr.write(tab + 'public ' + child_class_name + ' ' + child + ' = new ' + child_class_name + '();\n')
+        file_ptr.write(tab*2 + 'public ' + child_class_name + ' ' + child + ' = new ' + child_class_name + '();\n')
     
     if THROW_ERR_IF_GET_PATH_ON_ROOT:
-        file_ptr.write(tab + 'public string GetPath() { throw new Exception("GetPath() called on Root disallowed"); }\n')
+        file_ptr.write(tab*2 + 'public string GetPath() { throw new Exception("GetPath() called on Root disallowed"); }\n')
     else:
-        file_ptr.write(tab + 'public string GetPath() {return "";}\n')
-    file_ptr.write(tab + 'public Node GetNode(Node rootNode) { return rootNode; }\n')
+        file_ptr.write(tab*2 + 'public string GetPath() {return "";}\n')
+    file_ptr.write(tab*2 + 'public Node GetNode(Node rootNode) { return rootNode; }\n')
 
-    file_ptr.write('}\n\n')
+    file_ptr.write(tab + '}\n\n')
 
     for child in root_node['children']:
         recursive_write_node_to_file(file_ptr, root_node_class_name, root_node['children'][child], [])
+
+    file_ptr.write("}\n\n")
 
 if not PUT_PATH_CLASSES_IN_ORIGINAL_DIR:
     if not os.path.exists(PATH_CLASSES_FOLDER_PATH):
