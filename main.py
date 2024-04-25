@@ -68,6 +68,15 @@ def parse_scripts_into_dict(resource_block):
                 output[id_number] = class_name[:-3]
             #print(f"Extracted ID number: {id_number}",class_name)
 
+        instance_match = re.search(r'path="(.*?)"\s+type="PackedScene"\s+id=(\d+)', i)
+        if instance_match:
+            id_match = re.search(r'id=(\d+)', i)
+            id_number = int(id_match.group(1))
+
+            instance_file_path = instance_match.group(1)
+            instance_file_path = os.getcwd() + instance_file_path[5:].replace("/","\\")
+            output[id_number] = instance_file_path
+
     return output
 
 def parse_node_into_class(node_string, nodes_dict, script_dict={}):
@@ -77,8 +86,17 @@ def parse_node_into_class(node_string, nodes_dict, script_dict={}):
     name_pattern = r'name="([^"]+)"'
     type_pattern = r'type="([^"]+)"'
     name = re.search(name_pattern, node_values[0]).group(1)
+
     check_class_name(name)
-    node_type = re.search(type_pattern, node_values[0]).group(1)
+
+    if type_match_regex := re.search(type_pattern, node_values[0]):
+        node_type = type_match_regex.group(1)
+    else:
+        packed_scene_id = re.search(r"instance=ExtResource\( (\d+) \)", node_values[0])
+        packed_scene_id = int(packed_scene_id.group(1))
+
+        #Is an instance
+        node_type = parse_instance_into_class(script_dict[packed_scene_id])
 
     resource_pattern = r'ExtResource\(\s*(\d+)\s*\)'
     script_class = None
@@ -163,6 +181,24 @@ def write_node_to_file(file_ptr, new_class_name, nodes_dict):
         recursive_write_node_to_file(file_ptr, root_node_class_name, root_node['children'][child], [])
 
     file_ptr.write("}\n\n")
+
+def parse_instance_into_class(file_path):
+    file = open(file_path, 'r')
+
+    # Read the entire file content into a string
+    file_content = file.read().split("\n\n")
+    file.close()
+    script_dict = {}
+    nodes_dict = {}
+
+    for block in file_content:
+        if block.startswith('[ext_resource'):
+            script_dict = parse_scripts_into_dict(block)
+        elif block.startswith('[node'):
+            parse_node_into_class(block, nodes_dict=nodes_dict, script_dict=script_dict)
+            break
+
+    return nodes_dict["root"]["type"]
 
 if not PUT_PATH_CLASSES_IN_ORIGINAL_DIR:
     if not os.path.exists(PATH_CLASSES_FOLDER_PATH):
