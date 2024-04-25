@@ -11,7 +11,7 @@ PUT_PATH_CLASSES_IN_ORIGINAL_DIR = False
 # Since it's in the same folder
 # if a scene with the same name already exist else where it should throw an err
 THROW_ERR_IF_SAME_SCENE_NAME = True
-PATH_CLASSES_FOLDER_PATH = "NodePathsModule/NodePaths"
+PATH_CLASSES_FOLDER_PATH = "NodePaths"
 
 # All of the paths are based on the root node, therefore the root node has no path
 # If toggle, throw an error instead of returning empty string on root node
