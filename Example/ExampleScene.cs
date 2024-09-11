@@ -8,6 +8,7 @@ public class ExampleScene : Node2D
     {
         GD.Print(nodePaths.RootNodeName.SecondChild.Timer.GetNode(this));
         GD.Print(nodePaths.RootNodeName.Player.CollisionShape2D.GetPath());
+        GD.Print(nodePaths.RootNodeName.Player.GetNode(this));
     }
 
     //  // Called every frame. 'delta' is the elapsed time since the previous frame.

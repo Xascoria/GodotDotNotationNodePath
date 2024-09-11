@@ -1,8 +1,8 @@
 using System;
 using Godot;
 
-public interface IAutomatedNodePath
+public interface IAutomatedNodePath<T>
 {
     string GetPath();
-    Node GetNode(Node rootNode);
+    T GetNode(Node rootNode);
 }
