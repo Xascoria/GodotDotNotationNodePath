@@ -144,7 +144,7 @@ def recursive_write_node_to_file(file_ptr, parent_class_name, node_dict, path_so
 
     file_ptr.write(tab*2 + 'public string GetPath() {return "'+ 
                    (node_dict['name'] if len(path_so_far) == 0 else '/'.join(path_so_far) + '/' + node_dict['name'])  + '";}\n')
-    file_ptr.write(tab*2 + 'public ' + node_dict['type'] + ' GetNode() { return anyNodeRef.GetTree().CurrentScene.GetNode<'+ node_dict['type'] +'>(GetPath()); }\n')
+    file_ptr.write(tab*2 + 'public ' + node_dict['type'] + ' GetNode(Node rootNode) { return rootNode.GetNode<'+ node_dict['type'] +'>(GetPath()); }\n')
     file_ptr.write(tab + '}\n\n')
 
     for child in node_dict['children']:
@@ -156,23 +156,12 @@ def write_node_to_file(file_ptr, new_class_name, nodes_dict):
     # Write top imports
     file_ptr.write('using Godot;\nusing System;\n\n')
 
-
     # Write main NodePaths class
     root_node = nodes_dict['root']
     root_node_name = root_node['name']
     root_node_class_name = new_class_name + '_' + root_node_name
-    file_ptr.write('public class '+new_class_name+'\n{\n') 
-
-    # Write any node reference
-    file_ptr.write(tab + "private static Node anyNodeRef;\n")
-
-    file_ptr.write(tab + "public " + root_node_class_name + " " + root_node_name + " = new " 
-                   + root_node_class_name + "();\n" )
-    
-    # Write constructor
-    file_ptr.write(tab + 'public ' + new_class_name + '(Node anyNode)\n'+tab+'{\n')
-    file_ptr.write(tab*2 + 'anyNodeRef = anyNode;\n')
-    file_ptr.write(tab + '}\n')
+    file_ptr.write('public class '+new_class_name+'\n{\n' + tab + "public " 
+                   + root_node_class_name + " " + root_node_name + " = new " + root_node_class_name + "();\n" )
 
     # Write root node
     file_ptr.write(tab + 'public class ' + root_node_class_name + ' : IAutomatedNodePath<' + root_node['type'] + '>\n' + tab + '{\n')
@@ -184,7 +173,7 @@ def write_node_to_file(file_ptr, new_class_name, nodes_dict):
         file_ptr.write(tab*2 + 'public string GetPath() { throw new Exception("GetPath() called on Root disallowed"); }\n')
     else:
         file_ptr.write(tab*2 + 'public string GetPath() {return "";}\n')
-    file_ptr.write(tab*2 + 'public '+ root_node['type'] + ' GetNode() { return ('+ root_node['type'] + ') anyNodeRef.GetTree().CurrentScene; }\n')
+    file_ptr.write(tab*2 + 'public '+ root_node['type'] + ' GetNode(Node rootNode) { return rootNode.GetNode<'+ root_node['type'] +'>(GetPath()); }\n')
 
     file_ptr.write(tab + '}\n\n')
 
