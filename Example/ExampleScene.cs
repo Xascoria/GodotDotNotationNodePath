@@ -3,12 +3,14 @@ using System;
 
 public class ExampleScene : Node2D
 {
-    private _ExampleSceneNodePaths nodePaths = new _ExampleSceneNodePaths();
+    private _ExampleSceneNodePaths nodePaths;
     public override void _Ready()
     {
-        GD.Print(nodePaths.RootNodeName.SecondChild.Timer.GetNode(this));
+        nodePaths = new _ExampleSceneNodePaths(this);
+
+        GD.Print(nodePaths.RootNodeName.SecondChild.Timer.GetNode());
         GD.Print(nodePaths.RootNodeName.Player.CollisionShape2D.GetPath());
-        GD.Print(nodePaths.RootNodeName.Player.GetNode(this));
+        GD.Print(nodePaths.RootNodeName.Player.GetNode());
     }
 
     //  // Called every frame. 'delta' is the elapsed time since the previous frame.

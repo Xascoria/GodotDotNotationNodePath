@@ -4,5 +4,5 @@ using Godot;
 public interface IAutomatedNodePath<T>
 {
     string GetPath();
-    T GetNode(Node rootNode);
+    T GetNode();
 }
